@@ -1,4 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, {
+	createContext,
+	useContext,
+	useState,
+	ReactNode,
+	useRef,
+	useEffect,
+} from "react";
 
 type AccordionContextType = {
 	openItem: string | null;
@@ -21,7 +30,7 @@ export const Accordion = ({ children }: { children: ReactNode }) => {
 
 	return (
 		<AccordionContext.Provider value={{ openItem, toggleItem, isOpen }}>
-			<div className="accordion">{children}</div>
+			<div className="text-foreground-secondary">{children}</div>
 		</AccordionContext.Provider>
 	);
 };
@@ -50,12 +59,16 @@ const Header = ({ id, children }: HeaderProps) => {
 	return (
 		<button
 			type="button"
-			className="w-full h-[3.5em] border-gray-450 border-[3px] mb-[0.5em] bg-background-secondary"
+			className="w-full h-[3.5em] border-[3px] mb-[0.5em] bg-background-secondary"
 			onClick={() => context.toggleItem(id)}
 		>
 			<div className="flex items-center justify-between pr-3 pl-3">
 				<div>{children}</div>
-				<div>arrow</div>
+				<div>
+					<FontAwesomeIcon
+						icon={!context.isOpen(id) ? faChevronDown : faChevronUp}
+					/>
+				</div>
 			</div>
 		</button>
 	);
@@ -68,9 +81,35 @@ type BodyProps = {
 
 const Body = ({ id, children }: BodyProps) => {
 	const context = useAccordionContext();
-	if (!context.isOpen(id)) return null;
+	const ref = useRef<HTMLDivElement>(null);
+	const [height, setHeight] = useState("0px");
 
-	return <div className="accordion-body">{children}</div>;
+	const isOpen = context.isOpen(id);
+
+	useEffect(() => {
+		if (ref.current) {
+			if (isOpen) {
+				const scrollHeight = ref.current.scrollHeight;
+				setHeight(`${scrollHeight}px`);
+			} else {
+				setHeight("0px");
+			}
+		}
+	}, [isOpen]);
+
+	return (
+		<div
+			className="mb-[0.5em]"
+			ref={ref}
+			style={{
+				overflow: "hidden",
+				transition: "max-height 0.3s ease",
+				maxHeight: height,
+			}}
+		>
+			{children}
+		</div>
+	);
 };
 
 // Hook to access context
