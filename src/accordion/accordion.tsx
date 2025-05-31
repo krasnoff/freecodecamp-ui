@@ -56,11 +56,39 @@ type HeaderProps = {
 
 const Header = ({ id, children }: HeaderProps) => {
 	const context = useAccordionContext();
+	const ref = useRef<HTMLButtonElement>(null);
+	const isOpen = context.isOpen(id);
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
+			context.toggleItem(id);
+		}
+		if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+			e.preventDefault();
+			const direction = e.key === "ArrowDown" ? 1 : -1;
+			const allHeaders = document.querySelectorAll(
+				'[type="button"][data-accordion-header]',
+			);
+			const currentIndex = Array.from(allHeaders).indexOf(e.currentTarget);
+			const nextIndex =
+				(currentIndex + direction + allHeaders.length) % allHeaders.length;
+			(allHeaders[nextIndex] as HTMLElement).focus();
+		}
+	};
+
 	return (
 		<button
 			type="button"
 			className="w-full h-[3.5em] border-[3px] mb-[0.5em] bg-background-secondary"
+			ref={ref}
+			id={`accordion-header-${id}`}
+			tabIndex={0}
+			data-accordion-header
+			aria-expanded={isOpen}
+			aria-controls={`accordion-body-${id}`}
 			onClick={() => context.toggleItem(id)}
+			onKeyDown={handleKeyDown}
 		>
 			<div className="flex items-center justify-between pr-3 pl-3">
 				<div>{children}</div>
@@ -100,6 +128,7 @@ const Body = ({ id, children }: BodyProps) => {
 	return (
 		<div
 			className="mb-[0.5em]"
+			id={`accordion-body-${id}`}
 			ref={ref}
 			style={{
 				overflow: "hidden",
