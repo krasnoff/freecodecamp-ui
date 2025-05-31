@@ -10,7 +10,7 @@ import React, {
 } from "react";
 
 type AccordionContextType = {
-	openItem: string | null;
+	openItems: Set<string>;
 	toggleItem: (id: string) => void;
 	isOpen: (id: string) => boolean;
 };
@@ -19,17 +19,34 @@ const AccordionContext = createContext<AccordionContextType | undefined>(
 	undefined,
 );
 
-export const Accordion = ({ children }: { children: ReactNode }) => {
-	const [openItem, setOpenItem] = useState<string | null>(null);
+type AccordionProps = {
+	children: React.ReactNode;
+	allowMultiple?: boolean;
+};
+
+export const Accordion = ({
+	children,
+	allowMultiple = false,
+}: AccordionProps) => {
+	const [openItems, setOpenItems] = useState<Set<string>>(new Set());
 
 	const toggleItem = (id: string) => {
-		setOpenItem((prev) => (prev === id ? null : id));
+		setOpenItems((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) {
+				next.delete(id);
+			} else {
+				if (!allowMultiple) next.clear();
+				next.add(id);
+			}
+			return next;
+		});
 	};
 
-	const isOpen = (id: string) => openItem === id;
+	const isOpen = (id: string) => openItems.has(id);
 
 	return (
-		<AccordionContext.Provider value={{ openItem, toggleItem, isOpen }}>
+		<AccordionContext.Provider value={{ openItems, toggleItem, isOpen }}>
 			<div className="text-foreground-secondary">{children}</div>
 		</AccordionContext.Provider>
 	);
@@ -130,6 +147,9 @@ const Body = ({ id, children }: BodyProps) => {
 			className="mb-[0.5em]"
 			id={`accordion-body-${id}`}
 			ref={ref}
+			role="region"
+			aria-labelledby={`accordion-header-${id}`}
+			aria-hidden={!isOpen}
 			style={{
 				overflow: "hidden",
 				transition: "max-height 0.3s ease",
