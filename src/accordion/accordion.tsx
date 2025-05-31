@@ -50,19 +50,13 @@ const Header = ({ id, children }: HeaderProps) => {
 	return (
 		<button
 			type="button"
-			className="accordion-header"
+			className="w-full h-[3.5em] border-gray-450 border-[3px] mb-[0.5em] bg-background-secondary"
 			onClick={() => context.toggleItem(id)}
-			style={{
-				cursor: "pointer",
-				fontWeight: "bold",
-				background: "none",
-				border: "none",
-				padding: 0,
-				textAlign: "left",
-				width: "100%",
-			}}
 		>
-			{children}
+			<div className="flex items-center justify-between pr-3 pl-3">
+				<div>{children}</div>
+				<div>arrow</div>
+			</div>
 		</button>
 	);
 };
