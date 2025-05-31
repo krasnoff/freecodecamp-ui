@@ -24,6 +24,12 @@ type AccordionProps = {
 	allowMultiple?: boolean;
 };
 
+/**
+ * Accordion component for displaying collapsible content panels.
+ * The `Accordion` component provides context for its subcomponents (`Accordion.Item`, `Accordion.Header`, and `Accordion.Body`)
+ * to create accessible, interactive accordion UIs. It manages the open/closed state of items and supports both single and multiple
+ * item expansion via the `allowMultiple` prop.
+ */
 export const Accordion = ({
 	children,
 	allowMultiple = false,
